@@ -43,11 +43,11 @@ app.get('/', (req, res) => {
   });
 });
 
-app.use('/auth', authRoutes);
-app.use('/users', userRoutes);
-app.use('/activities', activityRoutes);
-app.use('/targets', targetRoutes);
-app.use('/summary', summaryRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/activities', activityRoutes);
+app.use('/api/targets', targetRoutes);
+app.use('/api/summary', summaryRoutes);
 
 app.use((req, res) => {
   res.status(404).json({
