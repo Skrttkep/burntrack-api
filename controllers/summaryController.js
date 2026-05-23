@@ -24,7 +24,7 @@ const getTodaySummary = async (req, res) => {
     const { data: todayActivities, error: activityError } = await supabase
       .from('activities')
       .select(
-        'id, user_id, activity_type, duration_minutes, weight_kg, calories_burned, sedentary_warning, notes, created_at'
+        'id, user_id, activity_type, duration_minutes, weight_kg, calories_burned, steps_count, sedentary_warning, notes, created_at'
       )
       .eq('user_id', userId)
       .gte('created_at', start)
@@ -52,12 +52,17 @@ const getTodaySummary = async (req, res) => {
     }
 
     const totalCalories = todayActivities.reduce(
-      (sum, activity) => sum + Number(activity.calories_burned),
+      (sum, activity) => sum + Number(activity.calories_burned || 0),
       0
     );
 
     const totalDurationMinutes = todayActivities.reduce(
-      (sum, activity) => sum + Number(activity.duration_minutes),
+      (sum, activity) => sum + Number(activity.duration_minutes || 0),
+      0
+    );
+
+    const totalSteps = todayActivities.reduce(
+      (sum, activity) => sum + Number(activity.steps_count || 0),
       0
     );
 
@@ -89,6 +94,11 @@ const getTodaySummary = async (req, res) => {
           )
         : 0;
 
+    const stepsProgress =
+      formattedTarget && formattedTarget.targetSteps > 0
+        ? Math.round((totalSteps / formattedTarget.targetSteps) * 100)
+        : 0;
+
     const formattedActivities = todayActivities.map((activity) => ({
       id: activity.id,
       userId: activity.user_id,
@@ -96,6 +106,7 @@ const getTodaySummary = async (req, res) => {
       durationMinutes: activity.duration_minutes,
       weightKg: activity.weight_kg,
       caloriesBurned: activity.calories_burned,
+      stepsCount: activity.steps_count ?? 0,
       sedentaryWarning: activity.sedentary_warning,
       notes: activity.notes,
       createdAt: activity.created_at,
@@ -108,11 +119,13 @@ const getTodaySummary = async (req, res) => {
         totalActivities: formattedActivities.length,
         totalCalories,
         totalDurationMinutes,
+        totalSteps,
         sedentaryWarnings,
         target: formattedTarget,
         progress: {
           calorieProgress,
           durationProgress,
+          stepsProgress,
         },
         activities: formattedActivities,
       },

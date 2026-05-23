@@ -16,6 +16,35 @@ const calculateCalories = (activityType, durationMinutes, weightKg) => {
   return Math.round(calories);
 };
 
+const calculateSteps = (activityType, durationMinutes) => {
+  const stepsPerMinute = {
+    diam: 0,
+    jalan: 100,
+    lari: 160,
+    bersepeda: 0,
+    olahraga_ringan: 70,
+  };
+
+  const stepRate = stepsPerMinute[activityType] || 0;
+
+  return Math.round(stepRate * durationMinutes);
+};
+
+const formatActivity = (activity) => {
+  return {
+    id: activity.id,
+    userId: activity.user_id,
+    activityType: activity.activity_type,
+    durationMinutes: activity.duration_minutes,
+    weightKg: activity.weight_kg,
+    caloriesBurned: activity.calories_burned,
+    stepsCount: activity.steps_count ?? 0,
+    sedentaryWarning: activity.sedentary_warning,
+    notes: activity.notes,
+    createdAt: activity.created_at,
+  };
+};
+
 const createActivity = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -44,14 +73,22 @@ const createActivity = async (req, res) => {
       });
     }
 
+    const finalDurationMinutes = Number(durationMinutes);
+    const finalWeightKg = Number(weightKg);
+
     const caloriesBurned = calculateCalories(
       activityType,
-      Number(durationMinutes),
-      Number(weightKg)
+      finalDurationMinutes,
+      finalWeightKg
+    );
+
+    const stepsCount = calculateSteps(
+      activityType,
+      finalDurationMinutes
     );
 
     const sedentaryWarning =
-      activityType === 'diam' && Number(durationMinutes) >= 60;
+      activityType === 'diam' && finalDurationMinutes >= 60;
 
     const { data: newActivity, error } = await supabase
       .from('activities')
@@ -59,15 +96,16 @@ const createActivity = async (req, res) => {
         {
           user_id: userId,
           activity_type: activityType,
-          duration_minutes: Number(durationMinutes),
-          weight_kg: Number(weightKg),
+          duration_minutes: finalDurationMinutes,
+          weight_kg: finalWeightKg,
           calories_burned: caloriesBurned,
+          steps_count: stepsCount,
           sedentary_warning: sedentaryWarning,
           notes: notes || '',
         },
       ])
       .select(
-        'id, user_id, activity_type, duration_minutes, weight_kg, calories_burned, sedentary_warning, notes, created_at'
+        'id, user_id, activity_type, duration_minutes, weight_kg, calories_burned, steps_count, sedentary_warning, notes, created_at'
       )
       .single();
 
@@ -80,17 +118,7 @@ const createActivity = async (req, res) => {
 
     return res.status(201).json({
       message: 'Aktivitas berhasil ditambahkan',
-      activity: {
-        id: newActivity.id,
-        userId: newActivity.user_id,
-        activityType: newActivity.activity_type,
-        durationMinutes: newActivity.duration_minutes,
-        weightKg: newActivity.weight_kg,
-        caloriesBurned: newActivity.calories_burned,
-        sedentaryWarning: newActivity.sedentary_warning,
-        notes: newActivity.notes,
-        createdAt: newActivity.created_at,
-      },
+      activity: formatActivity(newActivity),
     });
   } catch (error) {
     return res.status(500).json({
@@ -107,7 +135,7 @@ const getActivities = async (req, res) => {
     const { data: activities, error } = await supabase
       .from('activities')
       .select(
-        'id, user_id, activity_type, duration_minutes, weight_kg, calories_burned, sedentary_warning, notes, created_at'
+        'id, user_id, activity_type, duration_minutes, weight_kg, calories_burned, steps_count, sedentary_warning, notes, created_at'
       )
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
@@ -119,17 +147,7 @@ const getActivities = async (req, res) => {
       });
     }
 
-    const formattedActivities = activities.map((activity) => ({
-      id: activity.id,
-      userId: activity.user_id,
-      activityType: activity.activity_type,
-      durationMinutes: activity.duration_minutes,
-      weightKg: activity.weight_kg,
-      caloriesBurned: activity.calories_burned,
-      sedentaryWarning: activity.sedentary_warning,
-      notes: activity.notes,
-      createdAt: activity.created_at,
-    }));
+    const formattedActivities = activities.map(formatActivity);
 
     return res.status(200).json({
       message: 'Data aktivitas berhasil diambil',
@@ -152,7 +170,7 @@ const getActivityById = async (req, res) => {
     const { data: activity, error } = await supabase
       .from('activities')
       .select(
-        'id, user_id, activity_type, duration_minutes, weight_kg, calories_burned, sedentary_warning, notes, created_at'
+        'id, user_id, activity_type, duration_minutes, weight_kg, calories_burned, steps_count, sedentary_warning, notes, created_at'
       )
       .eq('id', activityId)
       .eq('user_id', userId)
@@ -166,17 +184,7 @@ const getActivityById = async (req, res) => {
 
     return res.status(200).json({
       message: 'Detail aktivitas berhasil diambil',
-      activity: {
-        id: activity.id,
-        userId: activity.user_id,
-        activityType: activity.activity_type,
-        durationMinutes: activity.duration_minutes,
-        weightKg: activity.weight_kg,
-        caloriesBurned: activity.calories_burned,
-        sedentaryWarning: activity.sedentary_warning,
-        notes: activity.notes,
-        createdAt: activity.created_at,
-      },
+      activity: formatActivity(activity),
     });
   } catch (error) {
     return res.status(500).json({
@@ -197,7 +205,7 @@ const deleteActivity = async (req, res) => {
       .eq('id', activityId)
       .eq('user_id', userId)
       .select(
-        'id, user_id, activity_type, duration_minutes, weight_kg, calories_burned, sedentary_warning, notes, created_at'
+        'id, user_id, activity_type, duration_minutes, weight_kg, calories_burned, steps_count, sedentary_warning, notes, created_at'
       )
       .single();
 
@@ -209,17 +217,7 @@ const deleteActivity = async (req, res) => {
 
     return res.status(200).json({
       message: 'Aktivitas berhasil dihapus',
-      activity: {
-        id: deletedActivity.id,
-        userId: deletedActivity.user_id,
-        activityType: deletedActivity.activity_type,
-        durationMinutes: deletedActivity.duration_minutes,
-        weightKg: deletedActivity.weight_kg,
-        caloriesBurned: deletedActivity.calories_burned,
-        sedentaryWarning: deletedActivity.sedentary_warning,
-        notes: deletedActivity.notes,
-        createdAt: deletedActivity.created_at,
-      },
+      activity: formatActivity(deletedActivity),
     });
   } catch (error) {
     return res.status(500).json({
@@ -235,4 +233,5 @@ module.exports = {
   getActivityById,
   deleteActivity,
   calculateCalories,
+  calculateSteps,
 };
