@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const swaggerUi = require('swagger-ui-express');
 require('dotenv').config();
 
 const swaggerDocument = require('./docs/swagger');
@@ -17,24 +16,61 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const swaggerOptions = {
-  explorer: true,
-  customSiteTitle: 'BurnTrack API Docs',
-  customCss: `
-    .swagger-ui .topbar { display: none }
-  `,
-};
+const swaggerHtml = `
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>BurnTrack API Docs</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui.css" />
+  <style>
+    body {
+      margin: 0;
+      background: #fafafa;
+    }
+
+    .topbar {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="swagger-ui"></div>
+
+  <script src="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui-bundle.js"></script>
+  <script src="https://unpkg.com/swagger-ui-dist@5.17.14/swagger-ui-standalone-preset.js"></script>
+  <script>
+    window.onload = function () {
+      window.ui = SwaggerUIBundle({
+        url: '/api-docs.json',
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        layout: 'StandaloneLayout',
+      });
+    };
+  </script>
+</body>
+</html>
+`;
 
 app.get('/api-docs.json', (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.status(200).json(swaggerDocument);
 });
 
-app.use(
-  '/api-docs',
-  swaggerUi.serve,
-  swaggerUi.setup(swaggerDocument, swaggerOptions)
-);
+app.get('/api-docs', (req, res) => {
+  res.setHeader('Content-Type', 'text/html');
+  res.status(200).send(swaggerHtml);
+});
+
+app.get('/api-docs/', (req, res) => {
+  res.setHeader('Content-Type', 'text/html');
+  res.status(200).send(swaggerHtml);
+});
 
 app.get('/', (req, res) => {
   res.status(200).json({

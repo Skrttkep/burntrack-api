@@ -12,11 +12,11 @@
       "dest": "/api/index.js"
     },
     {
-      "src": "/api-docs/(.*)",
+      "src": "/api-docs",
       "dest": "/api/index.js"
     },
     {
-      "src": "/api-docs",
+      "src": "/api-docs/",
       "dest": "/api/index.js"
     },
     {
