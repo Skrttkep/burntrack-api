@@ -17,13 +17,31 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+const swaggerOptions = {
+  explorer: true,
+  customSiteTitle: 'BurnTrack API Docs',
+  customCss: `
+    .swagger-ui .topbar { display: none }
+  `,
+};
+
+app.get('/api-docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.status(200).json(swaggerDocument);
+});
+
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerDocument, swaggerOptions)
+);
 
 app.get('/', (req, res) => {
   res.status(200).json({
     message: 'BurnTrack API is running on Vercel',
     version: '1.1.0',
     docs: '/api-docs',
+    swaggerJson: '/api-docs.json',
     endpoints: {
       auth: {
         register: 'POST /api/auth/register',
@@ -55,6 +73,7 @@ app.get('/', (req, res) => {
       },
       swagger: {
         docs: 'GET /api-docs',
+        json: 'GET /api-docs.json',
       },
     },
   });
