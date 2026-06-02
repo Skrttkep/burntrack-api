@@ -6,18 +6,25 @@ const getProfile = async (req, res) => {
 
     const { data: user, error } = await supabase
       .from('users')
-      .select('id, name, email, age, weight, height, created_at')
+      .select('id, name, email, age, weight, height, role, created_at')
       .eq('id', userId)
       .single();
 
-    if (error || !user) {
+    if (error) {
+      return res.status(500).json({
+        message: 'Gagal mengambil profile',
+        error: error.message,
+      });
+    }
+
+    if (!user) {
       return res.status(404).json({
         message: 'User tidak ditemukan',
       });
     }
 
     return res.status(200).json({
-      message: 'Data profile berhasil diambil',
+      message: 'Profile berhasil diambil',
       user: {
         id: user.id,
         name: user.name,
@@ -25,6 +32,7 @@ const getProfile = async (req, res) => {
         age: user.age,
         weight: user.weight,
         height: user.height,
+        role: user.role || 'user',
         createdAt: user.created_at,
       },
     });
@@ -54,29 +62,31 @@ const updateProfile = async (req, res) => {
       });
     }
 
-    const { data: updatedUser, error } = await supabase
+    const { data: user, error } = await supabase
       .from('users')
       .update(updateData)
       .eq('id', userId)
-      .select('id, name, email, age, weight, height')
+      .select('id, name, email, age, weight, height, role, created_at')
       .single();
 
-    if (error || !updatedUser) {
-      return res.status(404).json({
-        message: 'User tidak ditemukan atau gagal diperbarui',
-        error: error ? error.message : null,
+    if (error) {
+      return res.status(500).json({
+        message: 'Gagal memperbarui profile',
+        error: error.message,
       });
     }
 
     return res.status(200).json({
       message: 'Profile berhasil diperbarui',
       user: {
-        id: updatedUser.id,
-        name: updatedUser.name,
-        email: updatedUser.email,
-        age: updatedUser.age,
-        weight: updatedUser.weight,
-        height: updatedUser.height,
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        age: user.age,
+        weight: user.weight,
+        height: user.height,
+        role: user.role || 'user',
+        createdAt: user.created_at,
       },
     });
   } catch (error) {
