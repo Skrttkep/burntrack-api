@@ -10,6 +10,9 @@ const activityRoutes = require('../routes/activityRoutes');
 const targetRoutes = require('../routes/targetRoutes');
 const summaryRoutes = require('../routes/summaryRoutes');
 const adminRoutes = require('../routes/adminRoutes');
+const reportRoutes = require('../routes/reportRoutes');
+const recommendationRoutes = require('../routes/recommendationRoutes');
+const achievementRoutes = require('../routes/achievementRoutes');
 
 const app = express();
 
@@ -75,7 +78,7 @@ app.get('/api-docs/', (req, res) => {
 app.get('/', (req, res) => {
   res.status(200).json({
     message: 'BurnTrack API is running on Vercel',
-    version: '1.1.0',
+    version: '1.2.0',
     docs: '/api-docs',
     swaggerJson: '/api-docs.json',
     endpoints: {
@@ -100,6 +103,15 @@ app.get('/', (req, res) => {
       summary: {
         today: 'GET /api/summary/today',
       },
+      reports: {
+        weekly: 'GET /api/reports/weekly',
+      },
+      recommendations: {
+        today: 'GET /api/recommendations/today',
+      },
+      achievements: {
+        list: 'GET /api/achievements',
+      },
       admin: {
         summary: 'GET /api/admin/summary',
         users: 'GET /api/admin/users',
@@ -120,6 +132,9 @@ app.use('/api/users', userRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/targets', targetRoutes);
 app.use('/api/summary', summaryRoutes);
+app.use('/api/reports', reportRoutes);
+app.use('/api/recommendations', recommendationRoutes);
+app.use('/api/achievements', achievementRoutes);
 app.use('/api/admin', adminRoutes);
 
 app.use((req, res) => {
