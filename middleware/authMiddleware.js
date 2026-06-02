@@ -19,7 +19,6 @@ const verifyToken = (req, res, next) => {
     }
 
     const token = tokenParts[1];
-
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     req.user = decoded;
@@ -32,6 +31,30 @@ const verifyToken = (req, res, next) => {
   }
 };
 
+const verifyAdmin = (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        message: 'User belum terautentikasi',
+      });
+    }
+
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({
+        message: 'Akses ditolak. Endpoint ini hanya untuk admin',
+      });
+    }
+
+    next();
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Terjadi kesalahan saat validasi admin',
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   verifyToken,
+  verifyAdmin,
 };

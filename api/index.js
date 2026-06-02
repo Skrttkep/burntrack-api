@@ -1,22 +1,29 @@
 const express = require('express');
 const cors = require('cors');
+const swaggerUi = require('swagger-ui-express');
 require('dotenv').config();
+
+const swaggerDocument = require('./docs/swagger');
 
 const authRoutes = require('../routes/authRoutes');
 const userRoutes = require('../routes/userRoutes');
 const activityRoutes = require('../routes/activityRoutes');
 const targetRoutes = require('../routes/targetRoutes');
 const summaryRoutes = require('../routes/summaryRoutes');
+const adminRoutes = require('../routes/adminRoutes');
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 app.get('/', (req, res) => {
   res.status(200).json({
     message: 'BurnTrack API is running on Vercel',
-    version: '1.0.0',
+    version: '1.1.0',
+    docs: '/api-docs',
     endpoints: {
       auth: {
         register: 'POST /api/auth/register',
@@ -39,6 +46,16 @@ app.get('/', (req, res) => {
       summary: {
         today: 'GET /api/summary/today',
       },
+      admin: {
+        summary: 'GET /api/admin/summary',
+        users: 'GET /api/admin/users',
+        userDetail: 'GET /api/admin/users/:id',
+        userStatistics: 'GET /api/admin/users/:id/statistics',
+        activities: 'GET /api/admin/activities',
+      },
+      swagger: {
+        docs: 'GET /api-docs',
+      },
     },
   });
 });
@@ -48,6 +65,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/targets', targetRoutes);
 app.use('/api/summary', summaryRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.use((req, res) => {
   res.status(404).json({
