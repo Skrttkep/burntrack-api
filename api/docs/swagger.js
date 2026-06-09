@@ -1,11 +1,13 @@
 const swaggerDocument = {
   openapi: '3.0.0',
+
   info: {
     title: 'BurnTrack API',
-    version: '1.2.0',
+    version: '1.3.0',
     description:
-      'Dokumentasi REST API BurnTrack untuk autentikasi, profile, aktivitas, target harian, summary, admin, laporan mingguan, rekomendasi aktivitas, dan achievement.',
+      'Dokumentasi REST API BurnTrack untuk autentikasi, profil, aktivitas, target harian, ringkasan, laporan mingguan, rekomendasi, achievement tersimpan, dan fitur admin.',
   },
+
   servers: [
     {
       url: 'http://localhost:3000',
@@ -16,6 +18,7 @@ const swaggerDocument = {
       description: 'Vercel Production',
     },
   ],
+
   tags: [
     {
       name: 'Root',
@@ -27,7 +30,7 @@ const swaggerDocument = {
     },
     {
       name: 'User',
-      description: 'Profile user yang sedang login',
+      description: 'Profil user yang sedang login',
     },
     {
       name: 'Activities',
@@ -43,21 +46,24 @@ const swaggerDocument = {
     },
     {
       name: 'Reports',
-      description: 'Laporan aktivitas user',
+      description: 'Laporan aktivitas mingguan',
     },
     {
       name: 'Recommendations',
-      description: 'Rekomendasi cerdas berdasarkan aktivitas dan target',
+      description:
+        'Rekomendasi berdasarkan aktivitas dan target',
     },
     {
       name: 'Achievements',
-      description: 'Badge pencapaian user',
+      description:
+        'Badge, riwayat badge, dan klaim achievement',
     },
     {
       name: 'Admin',
       description: 'Endpoint khusus admin',
     },
   ],
+
   components: {
     securitySchemes: {
       bearerAuth: {
@@ -66,10 +72,18 @@ const swaggerDocument = {
         bearerFormat: 'JWT',
       },
     },
+
     schemas: {
       RegisterRequest: {
         type: 'object',
-        required: ['name', 'email', 'password', 'age', 'weight', 'height'],
+        required: [
+          'name',
+          'email',
+          'password',
+          'age',
+          'weight',
+          'height',
+        ],
         properties: {
           name: {
             type: 'string',
@@ -97,6 +111,7 @@ const swaggerDocument = {
           },
         },
       },
+
       LoginRequest: {
         type: 'object',
         required: ['email', 'password'],
@@ -111,6 +126,7 @@ const swaggerDocument = {
           },
         },
       },
+
       UpdateProfileRequest: {
         type: 'object',
         properties: {
@@ -132,17 +148,28 @@ const swaggerDocument = {
           },
         },
       },
+
       CreateActivityRequest: {
         type: 'object',
-        required: ['activityType', 'durationMinutes', 'weightKg'],
+        required: [
+          'activityType',
+          'durationMinutes',
+          'weightKg',
+        ],
         properties: {
           activityType: {
             type: 'string',
             example: 'jalan',
-            enum: ['diam', 'jalan', 'lari', 'bersepeda', 'olahraga_ringan'],
+            enum: [
+              'diam',
+              'jalan',
+              'lari',
+              'bersepeda',
+              'olahraga_ringan',
+            ],
           },
           durationMinutes: {
-            type: 'integer',
+            type: 'number',
             example: 5,
           },
           weightKg: {
@@ -151,14 +178,18 @@ const swaggerDocument = {
           },
           stepsCount: {
             type: 'integer',
-            example: 20,
+            example: 120,
+            description:
+              'Opsional. Jika tidak dikirim, API menghitung estimasi langkah berdasarkan jenis aktivitas dan durasi.',
           },
           notes: {
             type: 'string',
-            example: 'Aktivitas dari sensor accelerometer',
+            example:
+              'Aktivitas dari sensor accelerometer',
           },
         },
       },
+
       TargetRequest: {
         type: 'object',
         properties: {
@@ -178,6 +209,7 @@ const swaggerDocument = {
       },
     },
   },
+
   paths: {
     '/': {
       get: {
@@ -200,7 +232,8 @@ const swaggerDocument = {
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/RegisterRequest',
+                $ref:
+                  '#/components/schemas/RegisterRequest',
               },
             },
           },
@@ -224,13 +257,14 @@ const swaggerDocument = {
         tags: ['Auth'],
         summary: 'Login user atau admin',
         description:
-          'Gunakan token dari response login untuk endpoint yang membutuhkan Authorization Bearer Token.',
+          'Gunakan token dari response login pada tombol Authorize.',
         requestBody: {
           required: true,
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/LoginRequest',
+                $ref:
+                  '#/components/schemas/LoginRequest',
               },
             },
           },
@@ -240,10 +274,12 @@ const swaggerDocument = {
             description: 'Login berhasil',
           },
           400: {
-            description: 'Email dan password wajib diisi',
+            description:
+              'Email dan password wajib diisi',
           },
           401: {
-            description: 'Email atau password salah',
+            description:
+              'Email atau password salah',
           },
         },
       },
@@ -252,7 +288,8 @@ const swaggerDocument = {
     '/api/users/profile': {
       get: {
         tags: ['User'],
-        summary: 'Mengambil profile user login',
+        summary:
+          'Mengambil profil user login',
         security: [
           {
             bearerAuth: [],
@@ -260,16 +297,19 @@ const swaggerDocument = {
         ],
         responses: {
           200: {
-            description: 'Profile berhasil diambil',
+            description:
+              'Profil berhasil diambil',
           },
           401: {
             description: 'Token tidak valid',
           },
         },
       },
+
       put: {
         tags: ['User'],
-        summary: 'Update profile user login',
+        summary:
+          'Memperbarui profil user login',
         security: [
           {
             bearerAuth: [],
@@ -280,14 +320,16 @@ const swaggerDocument = {
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/UpdateProfileRequest',
+                $ref:
+                  '#/components/schemas/UpdateProfileRequest',
               },
             },
           },
         },
         responses: {
           200: {
-            description: 'Profile berhasil diperbarui',
+            description:
+              'Profil berhasil diperbarui',
           },
           401: {
             description: 'Token tidak valid',
@@ -301,7 +343,7 @@ const swaggerDocument = {
         tags: ['Activities'],
         summary: 'Menambahkan aktivitas',
         description:
-          'Menyimpan aktivitas user. Kalori dihitung oleh API, sedangkan stepsCount dapat dikirim dari hasil deteksi sensor Flutter.',
+          'Menyimpan aktivitas ke Supabase dan otomatis memeriksa achievement baru.',
         security: [
           {
             bearerAuth: [],
@@ -312,26 +354,35 @@ const swaggerDocument = {
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/CreateActivityRequest',
+                $ref:
+                  '#/components/schemas/CreateActivityRequest',
               },
             },
           },
         },
         responses: {
           201: {
-            description: 'Aktivitas berhasil ditambahkan',
+            description:
+              'Aktivitas berhasil ditambahkan',
           },
           400: {
-            description: 'Data aktivitas tidak lengkap',
+            description:
+              'Data aktivitas tidak valid',
           },
           401: {
             description: 'Token tidak valid',
           },
+          500: {
+            description:
+              'Gagal menyimpan aktivitas',
+          },
         },
       },
+
       get: {
         tags: ['Activities'],
-        summary: 'Mengambil riwayat aktivitas user login',
+        summary:
+          'Mengambil riwayat aktivitas user',
         security: [
           {
             bearerAuth: [],
@@ -339,7 +390,8 @@ const swaggerDocument = {
         ],
         responses: {
           200: {
-            description: 'Data aktivitas berhasil diambil',
+            description:
+              'Data aktivitas berhasil diambil',
           },
           401: {
             description: 'Token tidak valid',
@@ -351,7 +403,8 @@ const swaggerDocument = {
     '/api/activities/{id}': {
       get: {
         tags: ['Activities'],
-        summary: 'Mengambil detail aktivitas',
+        summary:
+          'Mengambil detail aktivitas',
         security: [
           {
             bearerAuth: [],
@@ -370,16 +423,23 @@ const swaggerDocument = {
         ],
         responses: {
           200: {
-            description: 'Detail aktivitas berhasil diambil',
+            description:
+              'Detail aktivitas berhasil diambil',
+          },
+          400: {
+            description:
+              'ID aktivitas tidak valid',
           },
           401: {
             description: 'Token tidak valid',
           },
           404: {
-            description: 'Aktivitas tidak ditemukan',
+            description:
+              'Aktivitas tidak ditemukan',
           },
         },
       },
+
       delete: {
         tags: ['Activities'],
         summary: 'Menghapus aktivitas',
@@ -401,13 +461,19 @@ const swaggerDocument = {
         ],
         responses: {
           200: {
-            description: 'Aktivitas berhasil dihapus',
+            description:
+              'Aktivitas berhasil dihapus',
+          },
+          400: {
+            description:
+              'ID aktivitas tidak valid',
           },
           401: {
             description: 'Token tidak valid',
           },
           404: {
-            description: 'Aktivitas tidak ditemukan',
+            description:
+              'Aktivitas tidak ditemukan',
           },
         },
       },
@@ -416,7 +482,8 @@ const swaggerDocument = {
     '/api/targets': {
       post: {
         tags: ['Targets'],
-        summary: 'Membuat atau memperbarui target harian',
+        summary:
+          'Membuat atau memperbarui target harian',
         security: [
           {
             bearerAuth: [],
@@ -427,26 +494,31 @@ const swaggerDocument = {
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/TargetRequest',
+                $ref:
+                  '#/components/schemas/TargetRequest',
               },
             },
           },
         },
         responses: {
           200: {
-            description: 'Target berhasil diperbarui',
+            description:
+              'Target berhasil diperbarui',
           },
           201: {
-            description: 'Target berhasil dibuat',
+            description:
+              'Target berhasil dibuat',
           },
           401: {
             description: 'Token tidak valid',
           },
         },
       },
+
       get: {
         tags: ['Targets'],
-        summary: 'Mengambil target harian user login',
+        summary:
+          'Mengambil target harian user',
         security: [
           {
             bearerAuth: [],
@@ -454,13 +526,15 @@ const swaggerDocument = {
         ],
         responses: {
           200: {
-            description: 'Target berhasil diambil',
+            description:
+              'Target berhasil diambil',
           },
           401: {
             description: 'Token tidak valid',
           },
           404: {
-            description: 'Target belum dibuat',
+            description:
+              'Target belum dibuat',
           },
         },
       },
@@ -469,9 +543,8 @@ const swaggerDocument = {
     '/api/summary/today': {
       get: {
         tags: ['Summary'],
-        summary: 'Mengambil ringkasan aktivitas hari ini',
-        description:
-          'Mengambil total aktivitas, total kalori, total durasi, total langkah, sedentary warning, target, dan progress harian.',
+        summary:
+          'Mengambil ringkasan aktivitas hari ini',
         security: [
           {
             bearerAuth: [],
@@ -479,7 +552,8 @@ const swaggerDocument = {
         ],
         responses: {
           200: {
-            description: 'Ringkasan aktivitas hari ini berhasil diambil',
+            description:
+              'Ringkasan berhasil diambil',
           },
           401: {
             description: 'Token tidak valid',
@@ -491,9 +565,8 @@ const swaggerDocument = {
     '/api/reports/weekly': {
       get: {
         tags: ['Reports'],
-        summary: 'Mengambil laporan aktivitas mingguan',
-        description:
-          'Menghitung total aktivitas, kalori, durasi, langkah, sedentary warning, aktivitas paling sering, rata-rata harian, dan laporan per hari selama 7 hari terakhir.',
+        summary:
+          'Mengambil laporan mingguan',
         security: [
           {
             bearerAuth: [],
@@ -501,7 +574,8 @@ const swaggerDocument = {
         ],
         responses: {
           200: {
-            description: 'Laporan mingguan berhasil diambil',
+            description:
+              'Laporan mingguan berhasil diambil',
           },
           401: {
             description: 'Token tidak valid',
@@ -513,9 +587,8 @@ const swaggerDocument = {
     '/api/recommendations/today': {
       get: {
         tags: ['Recommendations'],
-        summary: 'Mengambil rekomendasi aktivitas hari ini',
-        description:
-          'Memberikan rekomendasi cerdas berdasarkan perbandingan antara aktivitas hari ini, target harian, progress kalori, progress durasi, progress langkah, dan sedentary warning.',
+        summary:
+          'Mengambil rekomendasi hari ini',
         security: [
           {
             bearerAuth: [],
@@ -523,7 +596,8 @@ const swaggerDocument = {
         ],
         responses: {
           200: {
-            description: 'Rekomendasi berhasil dibuat',
+            description:
+              'Rekomendasi berhasil dibuat',
           },
           401: {
             description: 'Token tidak valid',
@@ -535,9 +609,10 @@ const swaggerDocument = {
     '/api/achievements': {
       get: {
         tags: ['Achievements'],
-        summary: 'Mengambil daftar achievement user',
+        summary:
+          'Mengambil seluruh achievement dan progress user',
         description:
-          'Menghasilkan badge pencapaian berdasarkan total aktivitas, kalori, langkah, durasi, aktivitas jalan/lari, konsistensi hari aktif, dan kondisi sedentary warning.',
+          'Menghitung progress badge dan menyimpan badge yang sudah terbuka ke tabel user_achievements.',
         security: [
           {
             bearerAuth: [],
@@ -545,10 +620,91 @@ const swaggerDocument = {
         ],
         responses: {
           200: {
-            description: 'Achievement berhasil diambil',
+            description:
+              'Achievement berhasil diambil',
           },
           401: {
             description: 'Token tidak valid',
+          },
+          500: {
+            description:
+              'Gagal mengambil achievement',
+          },
+        },
+      },
+    },
+
+    '/api/achievements/history': {
+      get: {
+        tags: ['Achievements'],
+        summary:
+          'Mengambil riwayat achievement user',
+        description:
+          'Mengambil badge yang sudah tersimpan permanen pada tabel user_achievements.',
+        security: [
+          {
+            bearerAuth: [],
+          },
+        ],
+        responses: {
+          200: {
+            description:
+              'Riwayat achievement berhasil diambil',
+          },
+          401: {
+            description: 'Token tidak valid',
+          },
+          500: {
+            description:
+              'Gagal mengambil riwayat achievement',
+          },
+        },
+      },
+    },
+
+    '/api/achievements/{id}/claim': {
+      post: {
+        tags: ['Achievements'],
+        summary: 'Mengklaim achievement',
+        description:
+          'Mengubah is_claimed menjadi true untuk achievement milik user.',
+        security: [
+          {
+            bearerAuth: [],
+          },
+        ],
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            description:
+              'ID dari tabel user_achievements',
+            schema: {
+              type: 'integer',
+            },
+            example: 1,
+          },
+        ],
+        responses: {
+          200: {
+            description:
+              'Achievement berhasil diklaim',
+          },
+          400: {
+            description:
+              'ID achievement tidak valid',
+          },
+          401: {
+            description: 'Token tidak valid',
+          },
+          404: {
+            description:
+              'Achievement tidak ditemukan',
+          },
+          500: {
+            description:
+              'Gagal mengklaim achievement',
           },
         },
       },
@@ -557,9 +713,8 @@ const swaggerDocument = {
     '/api/admin/summary': {
       get: {
         tags: ['Admin'],
-        summary: 'Dashboard summary admin',
-        description:
-          'Mengambil ringkasan seluruh data sistem. Hanya dapat diakses oleh user dengan role admin.',
+        summary:
+          'Mengambil ringkasan dashboard admin',
         security: [
           {
             bearerAuth: [],
@@ -567,13 +722,15 @@ const swaggerDocument = {
         ],
         responses: {
           200: {
-            description: 'Ringkasan admin berhasil diambil',
+            description:
+              'Ringkasan admin berhasil diambil',
           },
           401: {
             description: 'Token tidak valid',
           },
           403: {
-            description: 'Akses ditolak karena bukan admin',
+            description:
+              'Akses ditolak karena bukan admin',
           },
         },
       },
@@ -582,8 +739,8 @@ const swaggerDocument = {
     '/api/admin/users': {
       get: {
         tags: ['Admin'],
-        summary: 'Mengambil semua user',
-        description: 'Menampilkan daftar seluruh user yang terdaftar di BurnTrack.',
+        summary:
+          'Mengambil semua user',
         security: [
           {
             bearerAuth: [],
@@ -591,13 +748,15 @@ const swaggerDocument = {
         ],
         responses: {
           200: {
-            description: 'Daftar user berhasil diambil',
+            description:
+              'Daftar user berhasil diambil',
           },
           401: {
             description: 'Token tidak valid',
           },
           403: {
-            description: 'Akses ditolak karena bukan admin',
+            description:
+              'Akses ditolak karena bukan admin',
           },
         },
       },
@@ -606,7 +765,8 @@ const swaggerDocument = {
     '/api/admin/users/{id}': {
       get: {
         tags: ['Admin'],
-        summary: 'Mengambil detail user berdasarkan ID',
+        summary:
+          'Mengambil detail user',
         security: [
           {
             bearerAuth: [],
@@ -625,16 +785,19 @@ const swaggerDocument = {
         ],
         responses: {
           200: {
-            description: 'Detail user berhasil diambil',
+            description:
+              'Detail user berhasil diambil',
           },
           401: {
             description: 'Token tidak valid',
           },
           403: {
-            description: 'Akses ditolak karena bukan admin',
+            description:
+              'Akses ditolak karena bukan admin',
           },
           404: {
-            description: 'User tidak ditemukan',
+            description:
+              'User tidak ditemukan',
           },
         },
       },
@@ -643,9 +806,8 @@ const swaggerDocument = {
     '/api/admin/users/{id}/statistics': {
       get: {
         tags: ['Admin'],
-        summary: 'Mengambil statistik aktivitas user tertentu',
-        description:
-          'Mengambil total aktivitas, total kalori, total durasi, total langkah, sedentary warning, dan aktivitas favorit dari user tertentu.',
+        summary:
+          'Mengambil statistik user tertentu',
         security: [
           {
             bearerAuth: [],
@@ -664,16 +826,19 @@ const swaggerDocument = {
         ],
         responses: {
           200: {
-            description: 'Statistik user berhasil diambil',
+            description:
+              'Statistik user berhasil diambil',
           },
           401: {
             description: 'Token tidak valid',
           },
           403: {
-            description: 'Akses ditolak karena bukan admin',
+            description:
+              'Akses ditolak karena bukan admin',
           },
           404: {
-            description: 'User tidak ditemukan',
+            description:
+              'User tidak ditemukan',
           },
         },
       },
@@ -682,9 +847,8 @@ const swaggerDocument = {
     '/api/admin/activities': {
       get: {
         tags: ['Admin'],
-        summary: 'Mengambil semua aktivitas dari semua user',
-        description:
-          'Menampilkan seluruh aktivitas semua user, termasuk nama user, email, jenis aktivitas, durasi, kalori, langkah, warning, catatan, dan waktu aktivitas.',
+        summary:
+          'Mengambil seluruh aktivitas semua user',
         security: [
           {
             bearerAuth: [],
@@ -692,13 +856,15 @@ const swaggerDocument = {
         ],
         responses: {
           200: {
-            description: 'Semua aktivitas berhasil diambil',
+            description:
+              'Semua aktivitas berhasil diambil',
           },
           401: {
             description: 'Token tidak valid',
           },
           403: {
-            description: 'Akses ditolak karena bukan admin',
+            description:
+              'Akses ditolak karena bukan admin',
           },
         },
       },

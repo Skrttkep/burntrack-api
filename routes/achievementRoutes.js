@@ -2,6 +2,8 @@ const express = require('express');
 
 const {
   getAchievements,
+  getAchievementHistory,
+  claimAchievement,
 } = require('../controllers/achievementController');
 
 const {
@@ -10,6 +12,22 @@ const {
 
 const router = express.Router();
 
-router.get('/', verifyToken, getAchievements);
+router.get(
+  '/',
+  verifyToken,
+  getAchievements,
+);
+
+router.get(
+  '/history',
+  verifyToken,
+  getAchievementHistory,
+);
+
+router.post(
+  '/:id/claim',
+  verifyToken,
+  claimAchievement,
+);
 
 module.exports = router;
